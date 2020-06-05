@@ -2,46 +2,59 @@
 @using CustomerDemo.Models
 
 
-<div class="top-buffer"></div>
-<div class="panel panel-primary">
-    <div class="panel-heading panel-head">Customers</div>
-    <div class="panel-body">
-        <div class="btn-group">
-            <a id="createEditCustomerModal" data-toggle="modal" asp-action="AddEditCustomer" data-target="#modal-action-customer" class="btn btn-primary">
-                <i class="glyphicon glyphicon-plus"></i>  Add Customer
-            </a>
-        </div>
-        <div class="top-buffer"></div>
-        <table class="table table-bordered table-striped table-condensed">
-            <thead>
-                <tr>
-                    <th>FirstName</th>
-                    <th>LastName</th>
-                    <th>Email</th>
-                    <th>Contact Number</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model)
-                {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.LastName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                    <td>@Html.DisplayFor(modelItem => item.ContactNumber)</td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.Id"><i class="glyphicon glyphicon-pencil"></i>Edit</a> |
-                  
-                        <form asp-action="Delete"><i class="glyphicon glyphicon-trash"></i>
-                            <input type="hidden" value="@item.Id" name="id" />
-                            <input type="submit" value="Delete" />
-                        </form>
-
-                    </td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
+<div class="btn-group">
+    <a id="createCustomer" asp-action="Add" class="btn btn-primary">
+        <i class="fas fa-user-plus"></i>  Add Customer
+    </a>
 </div>
+<br/>
+<br />
+<form  method="get" asp-action="Index">
+    <p>
+        <input type="search" name="nameSearch" placeholder="Enter customer name..." value="@ViewData["GetCustomer"]">
+        <input type="submit" value="Search" class="btn btn-primary"/>
+        <a asp-action="Index">Get All Customers</a> 
+    </p>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>FirstName</th>
+            <th>LastName</th>
+            <th>Email</th>
+            <th>Contact Number</th>
+            <th>Action</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
+            <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+            <td>@Html.DisplayFor(modelItem => item.Email)</td>
+            <td>@Html.DisplayFor(modelItem => item.ContactNumber)</td>
+            
+            <td>
+                <a id="Editcustomer" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-info">
+                    <i class="fas fa-pen-square"></i> Edit
+                </a>
+           </td>
+        <td>
+                <form asp-action="Delete" method="post">
+                    <input type="hidden" value=@item.Id name="customerId" />
+                <button class="btn btn-danger" type="submit">
+                    <i class="far fa-trash-alt"></i> Delete
+                </button>
+                </form>
+            </td>
+            
+        </tr>}
+    </tbody>
+</table>
+
+
+
+
+

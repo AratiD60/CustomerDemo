@@ -1,4 +1,5 @@
 ﻿using CustomerDemo.Models;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,8 +8,8 @@ using System.Threading.Tasks;
 {
     public interface ICustomerRepository
     {
-        IOrderedQueryable<Customer> GetAll();
-        Customer Get(string customerId);
+        IList<Customer> GetAll();
+        Task<Customer> GetByFirstName(string firstName);
         Task<bool> Create(Customer customer);
 
         Task<bool> Update(Customer customer);

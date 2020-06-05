@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using CustomerDemo.Services;
 using CustomerDemo.Models;
+using System.Linq;
 
- namespace CustomerDemo.API.Controllers
+namespace CustomerDemo.API.Controllers
 {
     [Route("api/[controller]")]
      public class CustomerController: Controller
@@ -32,9 +33,13 @@ using CustomerDemo.Models;
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] Customer customer) 
         {
-             var result = await _customerService.Create(customer);
+            var count =_customerService.GetAll().Count;
+            var newID = count + 1;
+            customer.Id = newID.ToString();
 
-            if(string.IsNullOrEmpty(result.Id))
+            var result = await _customerService.Create(customer);
+
+            if(!string.IsNullOrEmpty(result.Id))
             { 
                 return Ok(result);
             }
@@ -61,10 +66,10 @@ using CustomerDemo.Models;
             }
         }
 
-       
 
-       
-        [HttpPost("delete/{id}")]
+
+
+        [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(string id)
@@ -78,6 +83,23 @@ using CustomerDemo.Models;
             else
             {
                 return BadRequest();
+            }
+        }
+
+        [HttpGet("{fname}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetCustomer(string fname)
+        {
+            var result = await _customerService.GetByFirstName(fname);
+
+            if (result!=null)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return BadRequest("Bad request");
             }
         }
     }

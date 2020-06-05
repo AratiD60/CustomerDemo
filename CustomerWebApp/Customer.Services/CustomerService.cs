@@ -42,14 +42,14 @@ using System.Threading.Tasks;
                 return null;
         }
 
-        public Customer Get(string customerId)
+        public async Task<Customer> GetByFirstName(string firstName)
         {
-            var result = _repository.Get(customerId);
+            var result = await _repository.GetByFirstName(firstName);
 
             return result;
         }
 
-        public IOrderedQueryable<Customer> GetAll()
+        public IList<Customer> GetAll()
         {
             var result = _repository.GetAll();
 

@@ -8,8 +8,8 @@ using CustomerDemo.Models;
 {
     public interface ICustomerService
     {
-        IOrderedQueryable<Customer> GetAll();
-        Customer Get(string customerId);
+        IList<Customer> GetAll();
+        Task<Customer> GetByFirstName(string customerId);
         Task<Customer> Create(Customer customer);
         Task<Customer> Update(Customer customer);
         Task<bool> Delete(string customerId);

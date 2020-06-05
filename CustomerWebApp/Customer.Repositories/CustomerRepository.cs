@@ -5,8 +5,10 @@ using Microsoft.Extensions.DependencyInjection;
 using CustomerDemo.Context;
 using CustomerDemo.Models;
 using CustomerDemo.Repositories;
+using System.Collections.Generic;
+using System.Globalization;
 
- namespace CustomerDemo.Repositories
+namespace CustomerDemo.Repositories
 {
     public class CustomerRepository : ICustomerRepository
     {
@@ -59,19 +61,24 @@ using CustomerDemo.Repositories;
             return success;
         }
 
-        public Customer Get(string customerId)
+        public async Task<Customer> GetByFirstName(string fname)
         {
+            TextInfo txtInfo = new CultureInfo("en-us", false).TextInfo;
+            var name = txtInfo.ToTitleCase(fname);
+
             var result = _databaseContext.Customers
-                                .Where(x => x.Id == customerId)
+                                .Where(x => x.FirstName == name)
                                 .FirstOrDefault();
+
+            await _databaseContext.SaveChangesAsync();
 
             return result;
         }
 
-        public IOrderedQueryable<Customer> GetAll()
+        public IList<Customer> GetAll()
         {
             var result = _databaseContext.Customers
-                                .OrderByDescending(x => x.Id);
+                                .OrderByDescending(x => x.Id).ToList();
 
             return result;
         }
@@ -93,6 +100,14 @@ using CustomerDemo.Repositories;
             }
 
             return success;
+        }
+        public Customer Get(string Id)
+        {
+            var result = _databaseContext.Customers
+                                .Where(x => x.Id == Id)
+                                .FirstOrDefault();
+
+            return result;
         }
     }
 }

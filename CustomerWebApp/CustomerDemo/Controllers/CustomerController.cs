@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -14,30 +15,53 @@ namespace CustomerDemo.Controllers
     {
         public async Task<IActionResult> Index()
         {
-            List<Customer> reservationList = new List<Customer>();
+            List<Customer> customerList = new List<Customer>();
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.GetAsync("http://localhost:54262/api/Customer"))
+                using (var response = await httpClient.GetAsync("http://localhost:5555/api/Customer"))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
-                    reservationList = JsonConvert.DeserializeObject<List<Customer>>(apiResponse);
+                    customerList = JsonConvert.DeserializeObject<List<Customer>>(apiResponse);
                 }
             }
-            return View(reservationList);
+            return View(customerList);
         }
 
-        public ViewResult AddReservation() => View();
+        [HttpGet]
+        public async Task<IActionResult> Index(string nameSearch)
+        {
+            ViewData["GetCustomer"] = nameSearch;
+            List<Customer> customerList = new List<Customer>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync("http://localhost:5555/api/Customer"))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    customerList = JsonConvert.DeserializeObject<List<Customer>>(apiResponse);
+                }
+            }
+
+            var customerQry = from x in customerList select x;
+            if (!string.IsNullOrEmpty(nameSearch))
+            {
+                TextInfo txtInfo = new CultureInfo("en-us", false).TextInfo;
+                var name = txtInfo.ToTitleCase(nameSearch);
+
+                customerQry = customerList.Where(x => x.FirstName.Contains(name) || x.LastName.Contains(name));
+            }
+            return View(customerQry.ToList());
+        }
+        public ViewResult Add() => View();
 
         [HttpPost]
-        public async Task<IActionResult> AddCustomer(Customer customer)
+        public async Task<IActionResult> Add(Customer customer)
         {
             Customer newCustomer = new Customer();
             using (var httpClient = new HttpClient())
-            {
-               // httpClient.DefaultRequestHeaders.Add("Key", "Secret@123");
+            {           
                 StringContent content = new StringContent(JsonConvert.SerializeObject(customer), Encoding.UTF8, "application/json");
 
-                using (var response = await httpClient.PostAsync("http://localhost:54262/api/Customer/create", content))
+                using (var response = await httpClient.PostAsync("http://localhost:5555/api/Customer/create", content))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     try
@@ -51,38 +75,56 @@ namespace CustomerDemo.Controllers
                     }
                 }
             }
-            return View(newCustomer);
+            //return View(newCustomer);
+            return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string Id)
+        {
+            if(string.IsNullOrEmpty(Id))
+            {
+                return RedirectToAction("Index");
+            }
+            List<Customer> customerList = new List<Customer>();
+            using (var httpClient = new HttpClient())
+            {
+                using (var response = await httpClient.GetAsync("http://localhost:5555/api/Customer"))
+                {
+                    string apiResponse = await response.Content.ReadAsStringAsync();
+                    customerList = JsonConvert.DeserializeObject<List<Customer>>(apiResponse);
+                }
+            }
+            var geCustomerDetails = customerList.Where(x => x.Id.Equals(Id)).FirstOrDefault();
+            return View(geCustomerDetails);
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateCustomer(Customer customer)
+        public async Task<IActionResult> Edit(Customer customer)
         {
             Customer newCustomer = new Customer();
             using (var httpClient = new HttpClient())
             {
-                var content = new MultipartFormDataContent();
-                content.Add(new StringContent(customer.Id.ToString()), "Id");
-                content.Add(new StringContent(customer.FirstName), "FirstName");
-                content.Add(new StringContent(customer.LastName), "LastName");
-                content.Add(new StringContent(customer.Email), "Email");
-                content.Add(new StringContent(customer.ContactNumber), "ContactNumber");
 
-                using (var response = await httpClient.PutAsync("http://localhost:54262/api/Customer/update", content))
+                StringContent content = new StringContent(JsonConvert.SerializeObject(customer), Encoding.UTF8, "application/json");
+
+                using (var response = await httpClient.PostAsync("http://localhost:5555/api/Customer/update", content))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
                     ViewBag.Result = "Success";
                     newCustomer = JsonConvert.DeserializeObject<Customer>(apiResponse);
                 }
             }
-            return View(newCustomer);
+            //return View(newCustomer);
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
-        public async Task<IActionResult> DeleteCustomer(int customerId)
+        public async Task<IActionResult> Delete(string customerId)
         {
             using (var httpClient = new HttpClient())
             {
-                using (var response = await httpClient.DeleteAsync("http://localhost:54262/api/Customer/delete" + customerId))
+                using (var response = await httpClient.DeleteAsync("http://localhost:5555/api/Customer/" + customerId))
                 {
                     string apiResponse = await response.Content.ReadAsStringAsync();
                 }
@@ -90,5 +132,7 @@ namespace CustomerDemo.Controllers
 
             return RedirectToAction("Index");
         }
+
+        
     }
 }
